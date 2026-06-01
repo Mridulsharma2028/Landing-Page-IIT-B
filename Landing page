@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS — Augmented Human Technology</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cyan: #00f5ff;
+    --cyan-dim: #00bcd4;
+    --cyan-dark: #006a75;
+    --red: #ff2d4e;
+    --red-dim: #cc1a36;
+    --orange: #ff6b1a;
+    --bg: #030810;
+    --bg2: #060d1a;
+    --bg3: #0a1628;
+    --surface: #0d1f36;
+    --surface2: #122540;
+    --grid-line: rgba(0,245,255,0.06);
+    --text: #e0f4ff;
+    --text-dim: #7ba8be;
+    --text-mute: #3a5a6e;
+    --border: rgba(0,245,255,0.18);
+    --border-strong: rgba(0,245,255,0.4);
+    --glow: 0 0 20px rgba(0,245,255,0.25), 0 0 60px rgba(0,245,255,0.1);
+    --glow-red: 0 0 20px rgba(255,45,78,0.3), 0 0 60px rgba(255,45,78,0.1);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CUSTOM CURSOR */
+  .cursor {
+    position: fixed;
+    width: 20px; height: 20px;
+    border: 1.5px solid var(--cyan);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.08s ease, width 0.2s, height 0.2s, border-color 0.2s;
+    mix-blend-mode: difference;
+  }
+  .cursor-dot {
+    position: fixed;
+    width: 4px; height: 4px;
+    background: var(--cyan);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+  }
+  .cursor.hover { width: 40px; height: 40px; border-color: var(--red); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--cyan-dark); border-radius: 2px; }
+
+  /* GRID BACKGROUND */
+  .grid-bg {
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 60px 60px;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .grid-bg::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0,245,255,0.07) 0%, transparent 70%);
+  }
+
+  /* SCAN LINE EFFECT */
+  .scanlines {
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 0 5%;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(3,8,16,0.85);
+    backdrop-filter: blur(12px);
+  }
+  .nav-logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.4rem; font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--cyan);
+    text-shadow: var(--glow);
+  }
+  .nav-logo span { color: var(--red); }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem; letter-spacing: 0.15em;
+    color: var(--text-dim); text-decoration: none;
+    text-transform: uppercase;
+    position: relative;
+    transition: color 0.2s;
+  }
+  .nav-links a::after {
+    content: ''; position: absolute;
+    bottom: -4px; left: 0; width: 0; height: 1px;
+    background: var(--cyan);
+    transition: width 0.3s;
+  }
+  .nav-links a:hover { color: var(--cyan); }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-cta {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.65rem; font-weight: 600;
+    letter-spacing: 0.2em;
+    padding: 8px 20px;
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    background: transparent;
+    cursor: none;
+    text-transform: uppercase;
+    transition: background 0.3s, box-shadow 0.3s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+  .nav-cta:hover { background: rgba(0,245,255,0.1); box-shadow: var(--glow); }
+
+  /* ─── HERO ─── */
+  .hero {
+    position: relative; z-index: 2;
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 100px 5% 80px;
+    overflow: hidden;
+  }
+  .hero-content {
+    max-width: 760px;
+    position: relative; z-index: 3;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.25em;
+    color: var(--cyan-dim);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    margin-bottom: 2rem;
+    background: rgba(0,245,255,0.04);
+    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+    animation: fadeSlideDown 0.8s ease both;
+  }
+  .badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan);
+    animation: pulse-dot 2s infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .hero-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    font-weight: 900;
+    line-height: 1.0;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.5rem;
+    animation: fadeSlideDown 0.8s 0.1s ease both;
+  }
+  .hero-title .line1 { display: block; color: var(--text); }
+  .hero-title .line2 {
+    display: block;
+    background: linear-gradient(90deg, var(--cyan), var(--cyan-dim) 50%, var(--red));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-title .line3 {
+    display: block; color: var(--text-dim);
+    font-size: 0.55em; font-weight: 400;
+    letter-spacing: 0.3em;
+    margin-top: 0.4em;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .hero-desc {
+    font-size: 1.1rem; font-weight: 400;
+    color: var(--text-dim); line-height: 1.7;
+    max-width: 540px;
+    margin-bottom: 2.5rem;
+    animation: fadeSlideDown 0.8s 0.2s ease both;
+  }
+  .hero-actions {
+    display: flex; gap: 1.2rem; flex-wrap: wrap;
+    animation: fadeSlideDown 0.8s 0.3s ease both;
+  }
+  .btn-primary {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem; font-weight: 700;
+    letter-spacing: 0.2em;
+    padding: 14px 36px;
+    background: var(--cyan);
+    color: var(--bg);
+    border: none; cursor: none;
+    text-transform: uppercase;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    transition: box-shadow 0.3s, transform 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+  }
+  .btn-primary:hover { box-shadow: var(--glow); transform: translateY(-2px); }
+  .btn-primary:hover::before { transform: translateX(100%); }
+  .btn-secondary {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.2em;
+    padding: 13px 30px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+    cursor: none;
+    text-transform: uppercase;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    transition: border-color 0.3s, color 0.3s, box-shadow 0.3s;
+  }
+  .btn-secondary:hover { border-color: var(--cyan); color: var(--cyan); box-shadow: var(--glow); }
+
+  /* HERO VISUAL RIGHT */
+  .hero-visual {
+    position: absolute;
+    right: -60px; top: 50%;
+    transform: translateY(-50%);
+    width: 55vw; max-width: 700px;
+    z-index: 1;
+    opacity: 0.9;
+    animation: fadeSlideLeft 1.2s 0.2s ease both;
+  }
+  .cyborg-svg { width: 100%; }
+
+  /* HERO STATS */
+  .hero-stats {
+    position: absolute;
+    bottom: 60px; left: 5%;
+    display: flex; gap: 3rem;
+    z-index: 3;
+    animation: fadeSlideUp 0.8s 0.5s ease both;
+  }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.8rem; font-weight: 700;
+    color: var(--cyan);
+    text-shadow: var(--glow);
+  }
+  .stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.2em;
+    color: var(--text-mute); text-transform: uppercase;
+  }
+
+  /* MARQUEE */
+  .marquee-wrap {
+    position: relative; z-index: 2;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,245,255,0.03);
+    padding: 14px 0;
+    overflow: hidden;
+  }
+  .marquee-track {
+    display: flex; gap: 0;
+    animation: marquee 30s linear infinite;
+    white-space: nowrap;
+  }
+  .marquee-item {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.3em;
+    color: var(--text-mute); text-transform: uppercase;
+    padding: 0 2.5rem;
+  }
+  .marquee-item span { color: var(--cyan); margin-right: 0.5rem; }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* ─── SECTION BASE ─── */
+  section {
+    position: relative; z-index: 2;
+    padding: 100px 5%;
+  }
+  .section-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.35em;
+    color: var(--cyan); text-transform: uppercase;
+    margin-bottom: 0.8rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-tag::before {
+    content: ''; width: 24px; height: 1px;
+    background: var(--cyan);
+  }
+  .section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 700; line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 1rem;
+  }
+  .section-title em {
+    font-style: normal;
+    color: var(--cyan);
+  }
+  .section-sub {
+    font-size: 1rem; color: var(--text-dim);
+    max-width: 500px; line-height: 1.7;
+    margin-bottom: 3.5rem;
+  }
+
+  /* ─── AUGMENTATION / FEATURES ─── */
+  .features { background: var(--bg2); }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5px;
+  }
+  .feature-card {
+    background: var(--surface);
+    padding: 2.5rem 2rem;
+    position: relative; overflow: hidden;
+    transition: background 0.3s;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    transform: scaleX(0);
+    transition: transform 0.5s;
+  }
+  .feature-card:hover { background: var(--surface2); }
+  .feature-card:hover::before { transform: scaleX(1); }
+  .feature-icon {
+    width: 48px; height: 48px;
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+  .feature-icon svg { width: 100%; height: 100%; }
+  .feature-num {
+    position: absolute; top: 2rem; right: 2rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 3rem; font-weight: 900;
+    color: rgba(0,245,255,0.05);
+    line-height: 1;
+  }
+  .feature-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem; font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+  }
+  .feature-desc {
+    font-size: 0.95rem; color: var(--text-dim);
+    line-height: 1.7;
+  }
+  .feature-tag {
+    display: inline-block;
+    margin-top: 1.5rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.2em;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    color: var(--cyan);
+    text-transform: uppercase;
+  }
+
+  /* ─── TECH SPECS ─── */
+  .specs { background: var(--bg); }
+  .specs-layout {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 5rem; align-items: center;
+  }
+  .specs-panel {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 2.5rem;
+    position: relative;
+  }
+  .specs-panel::after {
+    content: '';
+    position: absolute; bottom: -1px; right: -1px;
+    width: 32px; height: 32px;
+    border-right: 2px solid var(--cyan);
+    border-bottom: 2px solid var(--cyan);
+  }
+  .spec-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid rgba(0,245,255,0.06);
+    gap: 1rem;
+  }
+  .spec-row:last-child { border-bottom: none; }
+  .spec-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.15em;
+    color: var(--text-mute); text-transform: uppercase;
+    flex: 1;
+  }
+  .spec-bar-wrap { flex: 1; }
+  .spec-bar {
+    height: 3px;
+    background: var(--surface2);
+    position: relative; overflow: hidden;
+  }
+  .spec-bar-fill {
+    position: absolute; top: 0; left: 0; height: 100%;
+    background: linear-gradient(90deg, var(--cyan-dark), var(--cyan));
+    width: 0;
+    transition: width 1.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  .spec-val {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem; font-weight: 600;
+    color: var(--cyan);
+    min-width: 50px; text-align: right;
+  }
+  .specs-text .section-title { margin-bottom: 1.5rem; }
+  .specs-list { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 2rem; }
+  .specs-list-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    font-size: 0.95rem; color: var(--text-dim); line-height: 1.6;
+  }
+  .specs-list-item::before {
+    content: '//';
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--cyan); flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* ─── MODELS / PRODUCTS ─── */
+  .models { background: var(--bg2); }
+  .models-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  .model-card {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 2rem 1.8rem;
+    position: relative; overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .model-card.featured {
+    border-color: var(--cyan);
+    box-shadow: var(--glow);
+  }
+  .model-card:hover { transform: translateY(-6px); }
+  .model-card.featured:hover { box-shadow: 0 0 40px rgba(0,245,255,0.35), 0 20px 40px rgba(0,0,0,0.3); }
+  .model-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.25em;
+    padding: 3px 8px;
+    background: rgba(0,245,255,0.1);
+    color: var(--cyan);
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 1.2rem;
+  }
+  .model-card.featured .model-badge {
+    background: var(--cyan);
+    color: var(--bg);
+  }
+  .model-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.4rem; font-weight: 700;
+    color: var(--text); margin-bottom: 0.5rem;
+  }
+  .model-code {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.2em;
+    color: var(--text-mute); margin-bottom: 1.8rem;
+  }
+  .model-price {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.2rem; font-weight: 800;
+    color: var(--cyan);
+    text-shadow: var(--glow);
+    margin-bottom: 0.3rem;
+  }
+  .model-period {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; color: var(--text-mute);
+    margin-bottom: 2rem;
+  }
+  .model-features { list-style: none; display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 2rem; }
+  .model-features li {
+    font-size: 0.9rem; color: var(--text-dim);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .model-features li::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--cyan-dim); flex-shrink: 0;
+  }
+  .model-card.featured .model-features li::before { background: var(--cyan); }
+  .model-btn {
+    display: block; width: 100%;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 0.2em;
+    padding: 12px;
+    text-align: center;
+    text-transform: uppercase;
+    cursor: none;
+    transition: all 0.3s;
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    background: transparent;
+    text-decoration: none;
+  }
+  .model-card.featured .model-btn {
+    background: var(--cyan); color: var(--bg);
+    border-color: var(--cyan);
+  }
+  .model-btn:hover { box-shadow: var(--glow); }
+  .model-decoration {
+    position: absolute; bottom: -20px; right: -20px;
+    width: 120px; height: 120px;
+    border: 1px solid rgba(0,245,255,0.1);
+    border-radius: 50%;
+  }
+  .model-decoration::before {
+    content: ''; position: absolute; inset: 20px;
+    border: 1px solid rgba(0,245,255,0.07);
+    border-radius: 50%;
+  }
+
+  /* ─── TESTIMONIALS ─── */
+  .testimonials { background: var(--bg); }
+  .testimonials-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  .testimonial-card {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 2rem 1.8rem;
+    position: relative;
+  }
+  .testimonial-card::before {
+    content: '"';
+    position: absolute; top: 1rem; right: 1.5rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 4rem; font-weight: 900;
+    color: rgba(0,245,255,0.06);
+    line-height: 1;
+  }
+  .testimonial-text {
+    font-size: 0.95rem; color: var(--text-dim);
+    line-height: 1.75; margin-bottom: 1.8rem;
+    font-style: italic;
+  }
+  .testimonial-author { display: flex; align-items: center; gap: 12px; }
+  .author-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border-strong);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem; font-weight: 700;
+    color: var(--cyan);
+    background: rgba(0,245,255,0.06);
+    flex-shrink: 0;
+  }
+  .author-info .name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem; font-weight: 600;
+    color: var(--text);
+  }
+  .author-info .role {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.15em;
+    color: var(--text-mute); text-transform: uppercase;
+  }
+  .rating { display: flex; gap: 3px; margin-bottom: 1rem; }
+  .rating-dot { width: 6px; height: 6px; background: var(--cyan); border-radius: 1px; }
+  .rating-dot.dim { background: var(--surface2); border: 1px solid var(--border); }
+
+  /* ─── CTA SECTION ─── */
+  .cta-section {
+    background: var(--bg2);
+    text-align: center;
+    overflow: hidden;
+  }
+  .cta-section .section-title { margin: 0 auto 1rem; max-width: 600px; }
+  .cta-section .section-sub { margin: 0 auto 2.5rem; text-align: center; max-width: 480px; }
+  .cta-actions { display: flex; justify-content: center; gap: 1.2rem; flex-wrap: wrap; }
+  .cta-ring {
+    position: absolute;
+    border-radius: 50%; border: 1px solid rgba(0,245,255,0.06);
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    animation: ring-pulse 6s linear infinite;
+  }
+  .cta-ring:nth-child(1) { width: 300px; height: 300px; animation-delay: 0s; }
+  .cta-ring:nth-child(2) { width: 600px; height: 600px; animation-delay: 2s; }
+  .cta-ring:nth-child(3) { width: 900px; height: 900px; animation-delay: 4s; }
+  @keyframes ring-pulse {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    50% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1); }
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    position: relative; z-index: 2;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 3.5rem 5% 2rem;
+  }
+  .footer-grid {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 3rem; margin-bottom: 3rem;
+  }
+  .footer-brand .nav-logo { font-size: 1.2rem; margin-bottom: 1rem; display: block; }
+  .footer-desc {
+    font-size: 0.9rem; color: var(--text-mute); line-height: 1.7;
+    max-width: 240px; margin-bottom: 1.5rem;
+  }
+  .footer-social { display: flex; gap: 10px; }
+  .social-btn {
+    width: 34px; height: 34px;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-mute); cursor: none;
+    font-family: 'Orbitron', sans-serif; font-size: 0.55rem;
+    transition: border-color 0.3s, color 0.3s;
+  }
+  .social-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+  .footer-col-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 1.2rem;
+  }
+  .footer-links { list-style: none; display: flex; flex-direction: column; gap: 0.7rem; }
+  .footer-links a {
+    font-size: 0.9rem; color: var(--text-mute);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--cyan); }
+  .footer-bottom {
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.15em;
+    color: var(--text-mute); text-transform: uppercase;
+  }
+  .status-indicator {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .status-indicator::before {
+    content: ''; width: 6px; height: 6px;
+    border-radius: 50%; background: #00ff88;
+    box-shadow: 0 0 6px #00ff88;
+    animation: pulse-dot 2s infinite;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeSlideLeft {
+    from { opacity: 0; transform: translateY(-50%) translateX(40px); }
+    to { opacity: 0.9; transform: translateY(-50%) translateX(0); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    33% { transform: translateY(-12px) rotate(1deg); }
+    66% { transform: translateY(-6px) rotate(-1deg); }
+  }
+  @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes spin-reverse {
+    from { transform: rotate(360deg); }
+    to { transform: rotate(0deg); }
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* SCROLL REVEAL */
+  .reveal {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1; transform: translateY(0);
+  }
+
+  /* GLITCH EFFECT */
+  .glitch { position: relative; }
+  .glitch::before, .glitch::after {
+    content: attr(data-text);
+    position: absolute; top: 0; left: 0; width: 100%;
+    background: inherit;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .glitch::before {
+    color: var(--cyan);
+    text-shadow: none;
+    animation: glitch-before 3s infinite steps(1);
+    clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%);
+  }
+  .glitch::after {
+    color: var(--red);
+    text-shadow: none;
+    animation: glitch-after 3s infinite steps(1) 0.5s;
+    clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%);
+  }
+  @keyframes glitch-before {
+    0%, 90%, 100% { transform: none; opacity: 0; }
+    92% { transform: translateX(-4px); opacity: 1; }
+    94% { transform: translateX(4px); opacity: 1; }
+    96% { transform: none; opacity: 0; }
+  }
+  @keyframes glitch-after {
+    0%, 88%, 100% { transform: none; opacity: 0; }
+    90% { transform: translateX(4px); opacity: 1; }
+    93% { transform: translateX(-3px); opacity: 1; }
+    95% { transform: none; opacity: 0; }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 1024px) {
+    .hero-visual { width: 50vw; right: -80px; opacity: 0.5; }
+    .features-grid { grid-template-columns: repeat(2, 1fr); }
+    .models-grid { grid-template-columns: repeat(2, 1fr); }
+    .testimonials-grid { grid-template-columns: 1fr 1fr; }
+    .specs-layout { grid-template-columns: 1fr; gap: 3rem; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .hero { padding: 120px 5% 160px; }
+    .hero-visual { display: none; }
+    .hero-stats { flex-wrap: wrap; gap: 1.5rem 3rem; }
+    .features-grid { grid-template-columns: 1fr; }
+    .models-grid { grid-template-columns: 1fr; }
+    .testimonials-grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .footer-bottom { flex-direction: column; gap: 0.8rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- Background effects -->
+<div class="grid-bg"></div>
+<div class="scanlines"></div>
+
+<!-- ─── NAV ─── -->
+<nav>
+  <span class="nav-logo">NEX<span>U</span>S</span>
+  <ul class="nav-links">
+    <li><a href="#augmentation">Augmentation</a></li>
+    <li><a href="#specs">Tech Specs</a></li>
+    <li><a href="#models">Models</a></li>
+    <li><a href="#testimonials">Field Reports</a></li>
+  </ul>
+  <button class="nav-cta">Initialize</button>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Generation 7 Augmentation System — Online
+    </div>
+    <h1 class="hero-title">
+      <span class="line1">Transcend</span>
+      <span class="line2 glitch" data-text="Human Limits">Human Limits</span>
+      <span class="line3">// Nexus Augmentation Corp — 2047 //</span>
+    </h1>
+    <p class="hero-desc">
+      Neural mesh implants fused with nano-scale actuators and direct-cortex AI sync. We don't upgrade your tools — we upgrade <em style="font-style:normal;color:var(--cyan)">you</em>.
+    </p>
+    <div class="hero-actions">
+      <button class="btn-primary">Request Integration</button>
+      <button class="btn-secondary">View Schematics</button>
+    </div>
+  </div>
+
+  <!-- Cyborg SVG Illustration -->
+  <div class="hero-visual">
+    <svg class="cyborg-svg" viewBox="0 0 600 700" xmlns="http://www.w3.org/2000/svg" style="animation: float 7s ease-in-out infinite;">
+      <defs>
+        <radialGradient id="gHead" cx="50%" cy="40%" r="60%">
+          <stop offset="0%" stop-color="#1a3a5c"/>
+          <stop offset="100%" stop-color="#060d1a"/>
+        </radialGradient>
+        <radialGradient id="gEye" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="40%" stop-color="#00f5ff"/>
+          <stop offset="100%" stop-color="#006a75"/>
+        </radialGradient>
+        <filter id="glow-f">
+          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-sm">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#0d2040"/>
+          <stop offset="100%" stop-color="#04090f"/>
+        </linearGradient>
+        <linearGradient id="armGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#1a3a5c"/>
+          <stop offset="100%" stop-color="#060d1a"/>
+        </linearGradient>
+        <linearGradient id="circuitLine" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="rgba(0,245,255,0)"/>
+          <stop offset="50%" stop-color="#00f5ff"/>
+          <stop offset="100%" stop-color="rgba(0,245,255,0)"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Shoulder rings / halos -->
+      <circle cx="300" cy="350" r="240" fill="none" stroke="rgba(0,245,255,0.04)" stroke-width="1"/>
+      <circle cx="300" cy="350" r="200" fill="none" stroke="rgba(0,245,255,0.06)" stroke-width="1" stroke-dasharray="4 12"/>
+      <circle cx="300" cy="350" r="160" fill="none" stroke="rgba(0,245,255,0.08)" stroke-width="1"/>
+
+      <!-- Torso -->
+      <rect x="185" y="360" width="230" height="280" rx="10" fill="url(#bodyGrad)" stroke="#0d2a44" stroke-width="1.5"/>
+      <!-- chest plate -->
+      <rect x="210" y="385" width="180" height="130" rx="6" fill="#0a1e36" stroke="rgba(0,245,255,0.25)" stroke-width="1"/>
+      <!-- chest divider -->
+      <line x1="300" y1="385" x2="300" y2="515" stroke="rgba(0,245,255,0.15)" stroke-width="1"/>
+      <!-- chest glow nodes -->
+      <circle cx="260" cy="430" r="18" fill="#05101e" stroke="rgba(0,245,255,0.3)" stroke-width="1" filter="url(#glow-sm)"/>
+      <circle cx="260" cy="430" r="10" fill="rgba(0,245,255,0.12)" stroke="#00f5ff" stroke-width="1" filter="url(#glow-f)"/>
+      <circle cx="260" cy="430" r="4" fill="#00f5ff"/>
+      <circle cx="340" cy="430" r="18" fill="#05101e" stroke="rgba(255,45,78,0.3)" stroke-width="1"/>
+      <circle cx="340" cy="430" r="10" fill="rgba(255,45,78,0.1)" stroke="#ff2d4e" stroke-width="1"/>
+      <circle cx="340" cy="430" r="4" fill="#ff2d4e" filter="url(#glow-sm)"/>
+      <!-- chest circuit lines -->
+      <path d="M278 430 L220 430 L220 460 L210 460" fill="none" stroke="rgba(0,245,255,0.3)" stroke-width="0.75"/>
+      <path d="M322 430 L380 430 L380 460 L390 460" fill="none" stroke="rgba(255,45,78,0.3)" stroke-width="0.75"/>
+      <path d="M260 448 L260 515" fill="none" stroke="rgba(0,245,255,0.2)" stroke-width="0.75" stroke-dasharray="3 5"/>
+      <path d="M340 448 L340 515" fill="none" stroke="rgba(255,45,78,0.15)" stroke-width="0.75" stroke-dasharray="3 5"/>
+      <!-- chest bottom bars -->
+      <rect x="225" y="485" width="50" height="3" rx="1.5" fill="rgba(0,245,255,0.4)"/>
+      <rect x="225" y="492" width="30" height="2" rx="1" fill="rgba(0,245,255,0.2)"/>
+      <rect x="325" y="485" width="50" height="3" rx="1.5" fill="rgba(255,45,78,0.4)"/>
+      <rect x="345" y="492" width="30" height="2" rx="1" fill="rgba(255,45,78,0.2)"/>
+      <!-- ab-segment lines -->
+      <line x1="210" y1="530" x2="390" y2="530" stroke="rgba(0,245,255,0.1)" stroke-width="1"/>
+      <line x1="210" y1="560" x2="390" y2="560" stroke="rgba(0,245,255,0.07)" stroke-width="1"/>
+      <line x1="210" y1="590" x2="390" y2="590" stroke="rgba(0,245,255,0.07)" stroke-width="1"/>
+
+      <!-- Left shoulder pad -->
+      <ellipse cx="177" cy="370" rx="42" ry="28" fill="url(#armGrad)" stroke="rgba(0,245,255,0.3)" stroke-width="1.5"/>
+      <ellipse cx="177" cy="370" rx="28" ry="16" fill="none" stroke="rgba(0,245,255,0.2)" stroke-width="1" stroke-dasharray="3 6"/>
+      <!-- Left arm -->
+      <rect x="135" y="385" width="48" height="180" rx="8" fill="url(#armGrad)" stroke="#0d2a44" stroke-width="1.5"/>
+      <!-- arm armor strips -->
+      <rect x="140" y="405" width="38" height="4" rx="2" fill="rgba(0,245,255,0.2)"/>
+      <rect x="140" y="430" width="38" height="4" rx="2" fill="rgba(0,245,255,0.15)"/>
+      <rect x="140" y="455" width="38" height="4" rx="2" fill="rgba(0,245,255,0.1)"/>
+      <!-- arm circuit -->
+      <path d="M159 465 L159 520 L145 520 L145 540" fill="none" stroke="rgba(0,245,255,0.25)" stroke-width="0.75"/>
+      <!-- left hand -->
+      <rect x="132" y="562" width="52" height="44" rx="6" fill="url(#armGrad)" stroke="rgba(0,245,255,0.35)" stroke-width="1.5"/>
+      <!-- hand knuckles -->
+      <rect x="138" y="567" width="10" height="8" rx="3" fill="rgba(0,245,255,0.25)" stroke="rgba(0,245,255,0.4)" stroke-width="0.75"/>
+      <rect x="153" y="567" width="10" height="8" rx="3" fill="rgba(0,245,255,0.25)" stroke="rgba(0,245,255,0.4)" stroke-width="0.75"/>
+      <rect x="168" y="567" width="10" height="8" rx="3" fill="rgba(0,245,255,0.25)" stroke="rgba(0,245,255,0.4)" stroke-width="0.75"/>
+
+      <!-- Right shoulder pad — mechanical exposed -->
+      <ellipse cx="423" cy="370" rx="42" ry="28" fill="#080f1c" stroke="#00f5ff" stroke-width="1.5" filter="url(#glow-sm)"/>
+      <circle cx="423" cy="370" r="12" fill="rgba(0,245,255,0.08)" stroke="#00f5ff" stroke-width="1" filter="url(#glow-f)"/>
+      <circle cx="423" cy="370" r="5" fill="#00f5ff" filter="url(#glow-f)"/>
+      <!-- orbit ring on shoulder -->
+      <circle cx="423" cy="370" r="22" fill="none" stroke="rgba(0,245,255,0.35)" stroke-width="0.75" stroke-dasharray="2 5"
+        style="transform-origin: 423px 370px; animation: spin-slow 8s linear infinite;"/>
+      <!-- Right arm — more mechanical -->
+      <rect x="417" y="385" width="48" height="180" rx="8" fill="#060d1a" stroke="#00f5ff" stroke-width="1" filter="url(#glow-sm)"/>
+      <!-- mechanical segments -->
+      <rect x="420" y="395" width="42" height="28" rx="4" fill="rgba(0,245,255,0.06)" stroke="rgba(0,245,255,0.3)" stroke-width="0.75"/>
+      <rect x="420" y="430" width="42" height="28" rx="4" fill="rgba(0,245,255,0.04)" stroke="rgba(0,245,255,0.2)" stroke-width="0.75"/>
+      <rect x="420" y="465" width="42" height="28" rx="4" fill="rgba(0,245,255,0.04)" stroke="rgba(0,245,255,0.2)" stroke-width="0.75"/>
+      <!-- right arm inner lines -->
+      <line x1="441" y1="395" x2="441" y2="560" stroke="rgba(0,245,255,0.15)" stroke-width="0.75"/>
+      <!-- right hand mechanical -->
+      <rect x="416" y="562" width="52" height="44" rx="6" fill="#060d1a" stroke="#00f5ff" stroke-width="1.5" filter="url(#glow-sm)"/>
+      <!-- mechanical fingers indicator -->
+      <rect x="420" y="568" width="10" height="14" rx="2" fill="rgba(0,245,255,0.3)" stroke="#00f5ff" stroke-width="0.75"/>
+      <rect x="435" y="568" width="10" height="14" rx="2" fill="rgba(0,245,255,0.25)" stroke="#00f5ff" stroke-width="0.75"/>
+      <rect x="450" y="568" width="10" height="14" rx="2" fill="rgba(0,245,255,0.25)" stroke="#00f5ff" stroke-width="0.75"/>
+      <!-- cyan energy burst -->
+      <line x1="468" y1="580" x2="490" y2="560" stroke="#00f5ff" stroke-width="1" opacity="0.6"/>
+      <line x1="468" y1="585" x2="498" y2="582" stroke="#00f5ff" stroke-width="0.75" opacity="0.4"/>
+      <line x1="468" y1="580" x2="488" y2="598" stroke="#00f5ff" stroke-width="0.75" opacity="0.4"/>
+
+      <!-- Neck -->
+      <rect x="272" y="300" width="56" height="65" rx="4" fill="#0d1e36" stroke="rgba(0,245,255,0.15)" stroke-width="1"/>
+      <line x1="300" y1="300" x2="300" y2="365" stroke="rgba(0,245,255,0.1)" stroke-width="0.75"/>
+      <rect x="280" y="315" width="16" height="3" rx="1.5" fill="rgba(0,245,255,0.3)"/>
+      <rect x="280" y="322" width="16" height="3" rx="1.5" fill="rgba(0,245,255,0.2)"/>
+      <rect x="304" y="315" width="16" height="3" rx="1.5" fill="rgba(0,245,255,0.3)"/>
+      <rect x="304" y="322" width="16" height="3" rx="1.5" fill="rgba(0,245,255,0.2)"/>
+
+      <!-- Head -->
+      <ellipse cx="300" cy="230" rx="100" ry="110" fill="url(#gHead)" stroke="rgba(0,245,255,0.2)" stroke-width="1.5"/>
+      <!-- head plate seam -->
+      <path d="M200 210 L220 200 L240 205 L260 198 L300 195 L340 198 L360 205 L380 200 L400 210"
+        fill="none" stroke="rgba(0,245,255,0.15)" stroke-width="0.75"/>
+      <!-- cranial panel right -->
+      <path d="M360 180 Q395 175 405 200 Q410 230 400 250 L375 240 Q385 215 380 195 Z"
+        fill="rgba(0,245,255,0.04)" stroke="rgba(0,245,255,0.25)" stroke-width="1"/>
+      <!-- cranial circuitry -->
+      <path d="M375 200 L385 200 L385 225 L395 225" fill="none" stroke="rgba(0,245,255,0.35)" stroke-width="0.75"/>
+      <circle cx="395" cy="225" r="3" fill="#00f5ff" filter="url(#glow-f)"/>
+      <path d="M370 215 L380 215" fill="none" stroke="rgba(0,245,255,0.25)" stroke-width="0.75"/>
+      <!-- eye sockets -->
+      <ellipse cx="266" cy="228" rx="30" ry="22" fill="#04090e" stroke="rgba(0,245,255,0.2)" stroke-width="1"/>
+      <ellipse cx="334" cy="228" rx="30" ry="22" fill="#04090e" stroke="rgba(0,245,255,0.2)" stroke-width="1"/>
+      <!-- left eye — organic -->
+      <circle cx="266" cy="228" r="18" fill="url(#gEye)"/>
+      <circle cx="266" cy="228" r="8" fill="#030810" opacity="0.7"/>
+      <circle cx="270" cy="224" r="3" fill="rgba(255,255,255,0.5)"/>
+      <!-- right eye — mechanical -->
+      <circle cx="334" cy="228" r="18" fill="#020810" stroke="rgba(0,245,255,0.2)" stroke-width="1"/>
+      <circle cx="334" cy="228" r="14" fill="none" stroke="rgba(0,245,255,0.3)" stroke-width="0.75"
+        style="transform-origin: 334px 228px; animation: spin-reverse 4s linear infinite;"/>
+      <circle cx="334" cy="228" r="9" fill="rgba(0,245,255,0.15)" stroke="#00f5ff" stroke-width="1" filter="url(#glow-f)"/>
+      <circle cx="334" cy="228" r="5" fill="rgba(0,245,255,0.5)"/>
+      <circle cx="334" cy="228" r="2" fill="#00f5ff" filter="url(#glow-f)"/>
+      <!-- eye scan line -->
+      <line x1="244" y1="228" x2="288" y2="228" stroke="rgba(0,245,255,0.2)" stroke-width="0.5"/>
+      <line x1="312" y1="228" x2="356" y2="228" stroke="#00f5ff" stroke-width="0.75" opacity="0.5"/>
+      <!-- scan bracket on eye -->
+      <path d="M312 218 L310 218 L310 220" fill="none" stroke="#00f5ff" stroke-width="1" opacity="0.6"/>
+      <path d="M356 218 L358 218 L358 220" fill="none" stroke="#00f5ff" stroke-width="1" opacity="0.6"/>
+      <path d="M312 238 L310 238 L310 236" fill="none" stroke="#00f5ff" stroke-width="1" opacity="0.6"/>
+      <path d="M356 238 L358 238 L358 236" fill="none" stroke="#00f5ff" stroke-width="1" opacity="0.6"/>
+      <!-- nose bridge -->
+      <path d="M295 248 L295 268 L300 272 L305 268 L305 248"
+        fill="none" stroke="rgba(0,245,255,0.15)" stroke-width="1"/>
+      <!-- mouth -->
+      <rect x="270" y="278" width="60" height="8" rx="2" fill="#030810" stroke="rgba(0,245,255,0.2)" stroke-width="0.75"/>
+      <rect x="274" y="280" width="10" height="4" rx="1" fill="rgba(0,245,255,0.4)"/>
+      <rect x="288" y="280" width="10" height="4" rx="1" fill="rgba(0,245,255,0.3)"/>
+      <rect x="302" y="280" width="10" height="4" rx="1" fill="rgba(0,245,255,0.25)"/>
+      <rect x="316" y="280" width="10" height="4" rx="1" fill="rgba(0,245,255,0.3)"/>
+      <!-- left ear panel -->
+      <path d="M202 215 Q188 225 188 248 Q188 265 202 270"
+        fill="none" stroke="rgba(0,245,255,0.2)" stroke-width="1.5"/>
+      <rect x="195" y="228" width="14" height="3" rx="1.5" fill="rgba(0,245,255,0.3)"/>
+      <rect x="195" y="235" width="10" height="2" rx="1" fill="rgba(0,245,255,0.2)"/>
+      <!-- right ear — data port -->
+      <path d="M398 215 Q412 225 412 248 Q412 265 398 270"
+        fill="none" stroke="#00f5ff" stroke-width="1.5" filter="url(#glow-sm)"/>
+      <rect x="398" y="228" width="14" height="3" rx="1.5" fill="rgba(0,245,255,0.4)"/>
+      <circle cx="410" cy="244" r="4" fill="rgba(0,245,255,0.1)" stroke="#00f5ff" stroke-width="1" filter="url(#glow-f)"/>
+      <circle cx="410" cy="244" r="2" fill="#00f5ff"/>
+
+      <!-- HUD overlays floating around head -->
+      <!-- top bracket -->
+      <path d="M265 95 L245 95 L245 115" fill="none" stroke="rgba(0,245,255,0.4)" stroke-width="1"/>
+      <path d="M335 95 L355 95 L355 115" fill="none" stroke="rgba(0,245,255,0.4)" stroke-width="1"/>
+      <!-- HUD text lines -->
+      <rect x="265" y="90" width="70" height="12" rx="2" fill="rgba(0,245,255,0.05)"/>
+      <rect x="270" y="93" width="40" height="3" rx="1.5" fill="rgba(0,245,255,0.3)"/>
+      <rect x="270" y="98" width="25" height="2" rx="1" fill="rgba(0,245,255,0.2)"/>
+      <!-- HUD right label -->
+      <rect x="410" y="200" width="90" height="50" rx="4" fill="rgba(0,245,255,0.04)" stroke="rgba(0,245,255,0.2)" stroke-width="0.75"/>
+      <rect x="415" y="207" width="35" height="2" rx="1" fill="rgba(0,245,255,0.4)"/>
+      <rect x="415" y="213" width="50" height="2" rx="1" fill="rgba(0,245,255,0.25)"/>
+      <rect x="415" y="219" width="40" height="2" rx="1" fill="rgba(0,245,255,0.2)"/>
+      <rect x="415" y="225" width="30" height="2" rx="1" fill="rgba(0,245,255,0.3)"/>
+      <rect x="415" y="235" width="60" height="8" rx="2" fill="rgba(0,245,255,0.1)" stroke="rgba(0,245,255,0.3)" stroke-width="0.5"/>
+      <!-- HUD left label -->
+      <rect x="100" y="200" width="90" height="50" rx="4" fill="rgba(255,45,78,0.04)" stroke="rgba(255,45,78,0.2)" stroke-width="0.75"/>
+      <rect x="105" y="207" width="35" height="2" rx="1" fill="rgba(255,45,78,0.4)"/>
+      <rect x="105" y="213" width="50" height="2" rx="1" fill="rgba(255,45,78,0.2)"/>
+      <rect x="105" y="219" width="40" height="2" rx="1" fill="rgba(255,45,78,0.15)"/>
+      <rect x="105" y="225" width="30" height="2" rx="1" fill="rgba(255,45,78,0.25)"/>
+      <rect x="105" y="235" width="60" height="8" rx="2" fill="rgba(255,45,78,0.08)" stroke="rgba(255,45,78,0.3)" stroke-width="0.5"/>
+
+      <!-- data stream lines -->
+      <path d="M500 400 L540 380 L560 390 L580 375" fill="none" stroke="rgba(0,245,255,0.2)" stroke-width="0.75" stroke-dasharray="3 4"/>
+      <path d="M500 420 L550 420 L570 410" fill="none" stroke="rgba(0,245,255,0.15)" stroke-width="0.75" stroke-dasharray="2 6"/>
+      <path d="M20 400 L60 420 L40 440 L70 450" fill="none" stroke="rgba(255,45,78,0.2)" stroke-width="0.75" stroke-dasharray="3 4"/>
+    </svg>
+  </div>
+
+  <!-- Stats -->
+  <div class="hero-stats">
+    <div class="stat">
+      <span class="stat-num" data-target="99.7">0</span>
+      <span class="stat-label">// Uptime %</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" data-target="4200">0</span>
+      <span class="stat-label">// Augmented Users</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" data-target="7">0</span>
+      <span class="stat-label">// Gen Series</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" data-target="0.3">0</span>
+      <span class="stat-label">// Sync Latency ms</span>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="marquee-item"><span>◈</span> Neural Mesh Interface</span>
+    <span class="marquee-item"><span>◈</span> Quantum Encryption Layer</span>
+    <span class="marquee-item"><span>◈</span> Sub-Dermal Actuators</span>
+    <span class="marquee-item"><span>◈</span> Direct Cortex AI Sync</span>
+    <span class="marquee-item"><span>◈</span> Bio-Mechanical Fusion</span>
+    <span class="marquee-item"><span>◈</span> Nano-Scale Processors</span>
+    <span class="marquee-item"><span>◈</span> Adaptive Exo-Skeleton</span>
+    <span class="marquee-item"><span>◈</span> Real-Time Threat Analysis</span>
+    <!-- Duplicate for seamless loop -->
+    <span class="marquee-item"><span>◈</span> Neural Mesh Interface</span>
+    <span class="marquee-item"><span>◈</span> Quantum Encryption Layer</span>
+    <span class="marquee-item"><span>◈</span> Sub-Dermal Actuators</span>
+    <span class="marquee-item"><span>◈</span> Direct Cortex AI Sync</span>
+    <span class="marquee-item"><span>◈</span> Bio-Mechanical Fusion</span>
+    <span class="marquee-item"><span>◈</span> Nano-Scale Processors</span>
+    <span class="marquee-item"><span>◈</span> Adaptive Exo-Skeleton</span>
+    <span class="marquee-item"><span>◈</span> Real-Time Threat Analysis</span>
+  </div>
+</div>
+
+<!-- ─── FEATURES ─── -->
+<section id="augmentation" class="features">
+  <div class="section-tag reveal">Core Augmentations</div>
+  <h2 class="section-title reveal">Precision<br><em>Engineered</em> Modules</h2>
+  <p class="section-sub reveal">Each module is designed around your biology — not retrofitted. Six augmentation systems, infinite possibility.</p>
+
+  <div class="features-grid">
+    <!-- Card 1 -->
+    <div class="feature-card reveal">
+      <span class="feature-num">01</span>
+      <div class="feature-icon">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="40" height="40" rx="4" stroke="rgba(0,245,255,0.3)" stroke-width="1"/>
+          <circle cx="24" cy="24" r="10" stroke="#00f5ff" stroke-width="1.5"/>
+          <circle cx="24" cy="24" r="5" fill="rgba(0,245,255,0.2)" stroke="#00f5ff" stroke-width="1"/>
+          <circle cx="24" cy="24" r="2" fill="#00f5ff"/>
+          <line x1="4" y1="24" x2="14" y2="24" stroke="rgba(0,245,255,0.4)" stroke-width="1"/>
+          <line x1="34" y1="24" x2="44" y2="24" stroke="rgba(0,245,255,0.4)" stroke-width="1"/>
+          <line x1="24" y1="4" x2="24" y2="14" stroke="rgba(0,245,255,0.4)" stroke-width="1"/>
+          <line x1="24" y1="34" x2="24" y2="44" stroke="rgba(0,245,255,0.4)" stroke-width="1"/>
+        </svg>
+      </div>
+      <h3 class="feature-title">Neural Mesh Interface</h3>
+      <p class="feature-desc">A 200-nanometer lattice of bio-conductive filaments fused with your neural pathways. Latency of 0.3ms for seamless thought-to-action commands.</p>
+      <span class="feature-tag">Tier 1 Implant</span>
+    </div>
+    <!-- Card 2 -->
+    <div class="feature-card reveal">
+      <span class="feature-num">02</span>
+      <div class="feature-icon">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 40 L8 18 L24 8 L40 18 L40 40 Z" stroke="rgba(0,245,255,0.3)" stroke-width="1"/>
+          <path d="M16 40 L16 24 L24 18 L32 24 L32 40" stroke="#00f5ff" stroke-width="1"/>
+          <circle cx="24" cy="28" r="4" fill="rgba(0,245,255,0.15)" stroke="#00f5ff" stroke-width="1"/>
+          <rect x="21" y="36" width="6" height="4" fill="rgba(0,245,255,0.2)"/>
+        </svg>
+      </div>
+      <h3 class="feature-title">Adaptive Exo-Skeleton</h3>
+      <p class="feature-desc">Sub-dermal titanium-graphene scaffold with 12 servo nodes. Provides 400% strength augmentation while maintaining natural movement feel.</p>
+      <span class="feature-tag">Tier 2 Implant</span>
+    </div>
+    <!-- Card 3 -->
+    <div class="feature-card reveal">
+      <span class="feature-num">03</span>
+      <div class="feature-icon">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="24" cy="24" r="18" stroke="rgba(0,245,255,0.2)" stroke-width="1" stroke-dasharray="4 4"/>
+          <circle cx="24" cy="24" r="12" stroke="rgba(0,245,255,0.4)" stroke-width="1"/>
+          <path d="M14 24 Q18 16 24 14 Q30 16 34 24 Q30 32 24 34 Q18 32 14 24Z" fill="rgba(0,245,255,0.08)" stroke="#00f5ff" stroke-width="1"/>
+          <circle cx="24" cy="24" r="3" fill="#00f5ff"/>
+          <path d="M24 6 L24 12" stroke="rgba(255,45,78,0.5)" stroke-width="1.5"/>
+          <circle cx="24" cy="5" r="2" fill="#ff2d4e"/>
+        </svg>
+      </div>
+      <h3 class="feature-title">Ocular Augmentation</h3>
+      <p class="feature-desc">Synthetic retinal overlay with 8K/120fps resolution, thermal spectrum, and night vision. Integrated AR HUD with real-time data overlays.</p>
+      <span class="feature-tag">Tier 1 Implant</span>
+    </div>
+    <!-- Card 4 -->
+    <div class="feature-card reveal">
+      <span class="feature-num">04</span>
+      <div class="feature-icon">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="6" y="16" width="36" height="20" rx="3" stroke="rgba(0,245,255,0.3)" stroke-width="1"/>
+          <rect x="10" y="20" width="8" height="12" rx="1" fill="rgba(0,245,255,0.15)" stroke="rgba(0,245,255,0.4)" stroke-width="0.75"/>
+          <rect x="22" y="20" width="8" height="12" rx="1" fill="rgba(255,45,78,0.12)" stroke="rgba(255,45,78,0.35)" stroke-width="0.75"/>
+          <rect x="34" y="20" width="4" height="12" rx="1" fill="rgba(0,245,255,0.1)" stroke="rgba(0,245,255,0.25)" stroke-width="0.75"/>
+          <path d="M24 8 L24 16" stroke="rgba(0,245,255,0.4)" stroke-width="1.5"/>
+          <circle cx="24" cy="7" r="2.5" fill="none" stroke="rgba(0,245,255,0.5)" stroke-width="1"/>
+          <path d="M12 36 L12 42" stroke="rgba(0,245,255,0.3)" stroke-width="1"/>
+          <path d="M36 36 L36 42" stroke="rgba(0,245,255,0.3)" stroke-width="1"/>
+        </svg>
+      </div>
+      <h3 class="feature-title">Cortex AI Co-Processor</h3>
+      <p class="feature-desc">3nm quantum-silicon co-processor with 128 TFLOPS dedicated to predictive modeling, pattern recognition, and decision synthesis.</p>
+      <span class="feature-tag">Tier 3 Implant</span>
+    </div>
+    <!-- Card 5 -->
+    <div class="feature-card reveal">
+      <span class="feature-num">05</span>
+      <div class="feature-icon">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M24 4 L44 16 L44 32 L24 44 L4 32 L4 16 Z" stroke="rgba(0,245,255,0.3)" stroke-width="1"/>
+          <path d="M24 12 L36 19 L36 29 L24 36 L12 29 L12 19 Z" stroke="rgba(0,245,255,0.5)" stroke-width="1"/>
+          <path d="M24 20 L28 22 L28 26 L24 28 L20 26 L20 22 Z" fill="rgba(0,245,255,0.2)" stroke="#00f5ff" stroke-width="1"/>
+          <line x1="24" y1="4" x2="24" y2="12" stroke="rgba(255,45,78,0.5)" stroke-width="1"/>
+          <line x1="44" y1="16" x2="36" y2="19" stroke="rgba(255,45,78,0.4)" stroke-width="1"/>
+          <line x1="4" y1="16" x2="12" y2="19" stroke="rgba(255,45,78,0.4)" stroke-width="1"/>
+        </svg>
+      </div>
+      <h3 class="feature-title">Quantum Encryption Core</h3>
+      <p class="feature-desc">Entanglement-based quantum encryption for all neural communications. Provides absolute privacy, immune to conventional and quantum decryption attacks.</p>
+      <span class="feature-tag">Tier 2 Implant</span>
+    </div>
+    <!-- Card 6 -->
+    <div class="feature-card reveal">
+      <span class="feature-num">06</span>
+      <div class="feature-icon">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M24 8 Q32 12 36 20 Q40 28 36 36 Q30 44 22 42 Q14 40 10 32 Q6 24 10 16 Q16 8 24 8Z"
+            fill="rgba(0,245,255,0.06)" stroke="rgba(0,245,255,0.3)" stroke-width="1"/>
+          <path d="M24 14 Q30 17 32 24 Q30 31 24 34 Q18 31 16 24 Q18 17 24 14Z"
+            fill="rgba(0,245,255,0.12)" stroke="#00f5ff" stroke-width="1"/>
+          <circle cx="24" cy="24" r="4" fill="rgba(0,245,255,0.3)" stroke="#00f5ff" stroke-width="1"/>
+          <path d="M24 24 L24 8" stroke="rgba(0,245,255,0.4)" stroke-width="0.75" stroke-dasharray="2 3"/>
+          <path d="M24 24 L36 20" stroke="rgba(0,245,255,0.3)" stroke-width="0.75" stroke-dasharray="2 3"/>
+          <path d="M24 24 L16 36" stroke="rgba(0,245,255,0.3)" stroke-width="0.75" stroke-dasharray="2 3"/>
+        </svg>
+      </div>
+      <h3 class="feature-title">Bio-Energy Harvester</h3>
+      <p class="feature-desc">Piezoelectric network harvests kinetic and thermal energy from natural body movement. Generates up to 140W continuous power — zero external charging.</p>
+      <span class="feature-tag">Tier 1 Implant</span>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TECH SPECS ─── -->
+<section id="specs" class="specs">
+  <div class="specs-layout">
+    <div class="specs-text">
+      <div class="section-tag reveal">Technical Specifications</div>
+      <h2 class="section-title reveal">Built to<br><em>Exceed</em> Every Limit</h2>
+      <p class="section-sub reveal">Engineered at the molecular level. The numbers speak for themselves.</p>
+      <div class="specs-list reveal">
+        <div class="specs-list-item">Biocompatibility rating of 99.97% across all tested phenotypes</div>
+        <div class="specs-list-item">Autonomous self-repair via nano-bot maintenance swarms</div>
+        <div class="specs-list-item">Operates in -40°C to +120°C environments without degradation</div>
+        <div class="specs-list-item">Over-the-air firmware updates while you sleep</div>
+        <div class="specs-list-item">Full consciousness backup to quantum-encrypted cloud</div>
+      </div>
+    </div>
+    <div class="specs-panel reveal" id="specsPanel">
+      <div class="spec-row">
+        <span class="spec-name">// Processing Speed</span>
+        <div class="spec-bar-wrap"><div class="spec-bar"><div class="spec-bar-fill" data-width="96"></div></div></div>
+        <span class="spec-val">128 TFLOPS</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">// Neural Latency</span>
+        <div class="spec-bar-wrap"><div class="spec-bar"><div class="spec-bar-fill" data-width="99"></div></div></div>
+        <span class="spec-val">0.3ms</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">// Strength Amplification</span>
+        <div class="spec-bar-wrap"><div class="spec-bar"><div class="spec-bar-fill" data-width="80"></div></div></div>
+        <span class="spec-val">400%</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">// Biocompatibility</span>
+        <div class="spec-bar-wrap"><div class="spec-bar"><div class="spec-bar-fill" data-width="99.97"></div></div></div>
+        <span class="spec-val">99.97%</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">// Energy Efficiency</span>
+        <div class="spec-bar-wrap"><div class="spec-bar"><div class="spec-bar-fill" data-width="88"></div></div></div>
+        <span class="spec-val">140W Self</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">// Encryption Depth</span>
+        <div class="spec-bar-wrap"><div class="spec-bar"><div class="spec-bar-fill" data-width="100"></div></div></div>
+        <span class="spec-val">Quantum</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-name">// Uptime SLA</span>
+        <div class="spec-bar-wrap"><div class="spec-bar"><div class="spec-bar-fill" data-width="99.7"></div></div></div>
+        <span class="spec-val">99.7%</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── MODELS ─── -->
+<section id="models" class="models">
+  <div class="section-tag reveal">Augmentation Series</div>
+  <h2 class="section-title reveal">Choose Your<br><em>Evolution</em></h2>
+  <p class="section-sub reveal">Three carefully engineered tiers. Each one a complete transformation.</p>
+
+  <div class="models-grid">
+    <!-- SCOUT -->
+    <div class="model-card reveal">
+      <div class="model-decoration"></div>
+      <span class="model-badge">Scout Series</span>
+      <div class="model-name">NEXUS-1</div>
+      <div class="model-code">// MODEL-NX1-2047</div>
+      <div class="model-price">$48,000</div>
+      <div class="model-period">// One-time integration fee</div>
+      <ul class="model-features">
+        <li>Neural Mesh Interface (Tier 1)</li>
+        <li>Ocular Augmentation</li>
+        <li>Bio-Energy Harvester</li>
+        <li>Basic AI Co-Processor</li>
+        <li>Quantum Encryption (128-bit)</li>
+      </ul>
+      <a href="#" class="model-btn">Initialize NEXUS-1</a>
+    </div>
+    <!-- APEX — Featured -->
+    <div class="model-card featured reveal">
+      <div class="model-decoration"></div>
+      <span class="model-badge">Apex Series — Most Chosen</span>
+      <div class="model-name">NEXUS-4</div>
+      <div class="model-code">// MODEL-NX4-2047</div>
+      <div class="model-price">$120,000</div>
+      <div class="model-period">// One-time integration fee</div>
+      <ul class="model-features">
+        <li>Full Neural Mesh (Tier 2)</li>
+        <li>Adaptive Exo-Skeleton</li>
+        <li>Enhanced Ocular System</li>
+        <li>Cortex AI Co-Processor</li>
+        <li>Quantum Encryption (256-bit)</li>
+        <li>Sub-Dermal Armor Layer</li>
+      </ul>
+      <a href="#" class="model-btn">Initialize NEXUS-4</a>
+    </div>
+    <!-- SOVEREIGN -->
+    <div class="model-card reveal">
+      <div class="model-decoration"></div>
+      <span class="model-badge">Sovereign Series</span>
+      <div class="model-name">NEXUS-7</div>
+      <div class="model-code">// MODEL-NX7-2047</div>
+      <div class="model-price">$340,000</div>
+      <div class="model-period">// One-time integration fee</div>
+      <ul class="model-features">
+        <li>Full-Body Neural Integration</li>
+        <li>Military-Grade Exo-Skeleton</li>
+        <li>Quantum Cortex Processor</li>
+        <li>Sovereign Encryption Core</li>
+        <li>Consciousness Backup System</li>
+        <li>Nano-Bot Repair Swarm</li>
+      </ul>
+      <a href="#" class="model-btn">Initialize NEXUS-7</a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TESTIMONIALS ─── -->
+<section id="testimonials" class="testimonials">
+  <div class="section-tag reveal">Field Reports</div>
+  <h2 class="section-title reveal">Augmented<br><em>Operators</em> Speak</h2>
+  <p class="section-sub reveal">The most honest review is the one from those who live inside the machine.</p>
+
+  <div class="testimonials-grid">
+    <div class="testimonial-card reveal">
+      <div class="rating"><div class="rating-dot"></div><div class="rating-dot"></div><div class="rating-dot"></div><div class="rating-dot"></div><div class="rating-dot"></div></div>
+      <p class="testimonial-text">Running the NEXUS-4 for 14 months. Combat response time dropped by 340%. The ocular HUD is not a display — it's a new sense organ. I stopped thinking of it as technology after week 3.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">MK</div>
+        <div class="author-info">
+          <div class="name">Commander M. Kurai</div>
+          <div class="role">// Special Operations, Tier 4 Clearance</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal">
+      <div class="rating"><div class="rating-dot"></div><div class="rating-dot"></div><div class="rating-dot"></div><div class="rating-dot"></div><div class="rating-dot"></div></div>
+      <p class="testimonial-text">The neural latency of 0.3ms is not a spec sheet number. It's the difference between reflex and thought. My surgical precision improved by orders of magnitude after the Cortex AI sync.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">SR</div>
+        <div class="author-info">
+          <div class="name">Dr. S. Reyes</div>
+          <div class="role">// Neurosurgeon, NEXUS-4 User</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal">
+      <div class="rating"><div class="rating-dot"></div><div class="rating-dot"></div><div class="rating-dot"></div><div class="rating-dot"></div><div class="rating-dot dim"></div></div>
+      <p class="testimonial-text">I was skeptical about consciousness backup. Two years in, having survived a structural collapse at Proxima Station, I'm grateful it wasn't a checkbox feature. It's everything.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">TZ</div>
+        <div class="author-info">
+          <div class="name">T. Zhen</div>
+          <div class="role">// Orbital Engineer, NEXUS-7 User</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CTA ─── -->
+<section class="cta-section">
+  <div class="cta-ring"></div>
+  <div class="cta-ring"></div>
+  <div class="cta-ring"></div>
+  <div class="section-tag reveal" style="justify-content:center">Begin Integration</div>
+  <h2 class="section-title reveal">Ready to<br><em>Evolve?</em></h2>
+  <p class="section-sub reveal">The body you were given is a starting point. What you become is a choice. Our specialists are standing by for your initial consultation.</p>
+  <div class="cta-actions reveal">
+    <button class="btn-primary">Schedule Consultation</button>
+    <button class="btn-secondary">Download Prospectus</button>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <span class="nav-logo">NEX<span>U</span>S</span>
+      <p class="footer-desc">Augmented Human Technology Division. Nexus Corp, established 2031. Changing what it means to be human.</p>
+      <div class="footer-social">
+        <div class="social-btn">X</div>
+        <div class="social-btn">TG</div>
+        <div class="social-btn">GH</div>
+        <div class="social-btn">IN</div>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Augmentation</div>
+      <ul class="footer-links">
+        <li><a href="#">Neural Interface</a></li>
+        <li><a href="#">Exo-Skeleton</a></li>
+        <li><a href="#">Ocular Systems</a></li>
+        <li><a href="#">Cortex AI</a></li>
+        <li><a href="#">Energy Core</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Company</div>
+      <ul class="footer-links">
+        <li><a href="#">About Nexus</a></li>
+        <li><a href="#">Research Labs</a></li>
+        <li><a href="#">Clinical Trials</a></li>
+        <li><a href="#">Ethics Board</a></li>
+        <li><a href="#">Press Kit</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Support</div>
+      <ul class="footer-links">
+        <li><a href="#">Integration Guide</a></li>
+        <li><a href="#">Maintenance</a></li>
+        <li><a href="#">Emergency Support</a></li>
+        <li><a href="#">Community</a></li>
+        <li><a href="#">Firmware Updates</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2047 Nexus Augmentation Corp. All rights reserved.</span>
+    <span class="status-indicator">All Systems Nominal</span>
+    <span>Version 7.4.1 // Build 20471201</span>
+  </div>
+</footer>
+
+<script>
+// ── Cursor ──
+const cursor = document.getElementById('cursor');
+const cursorDot = document.getElementById('cursorDot');
+let mouseX = 0, mouseY = 0, curX = 0, curY = 0;
+
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX; mouseY = e.clientY;
+  cursorDot.style.left = mouseX + 'px';
+  cursorDot.style.top = mouseY + 'px';
+});
+
+function animateCursor() {
+  curX += (mouseX - curX) * 0.15;
+  curY += (mouseY - curY) * 0.15;
+  cursor.style.left = curX + 'px';
+  cursor.style.top = curY + 'px';
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+document.querySelectorAll('button, a, .nav-links a, .model-btn, .social-btn').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+});
+
+// ── Counter animation ──
+function animateCounter(el, target, duration = 2000) {
+  const start = performance.now();
+  const isFloat = target % 1 !== 0;
+  const step = (now) => {
+    const progress = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    const val = target * ease;
+    el.textContent = isFloat ? val.toFixed(1) : Math.floor(val).toLocaleString();
+    if (progress < 1) requestAnimationFrame(step);
+    else el.textContent = isFloat ? target.toFixed(1) : target.toLocaleString();
+  };
+  requestAnimationFrame(step);
+}
+
+// ── Scroll Reveal ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 80);
+    }
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Counter observe
+const statNums = document.querySelectorAll('.stat-num[data-target]');
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const target = parseFloat(entry.target.dataset.target);
+      animateCounter(entry.target, target);
+      counterObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.5 });
+statNums.forEach(el => counterObserver.observe(el));
+
+// ── Spec bars ──
+const specObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.querySelectorAll('.spec-bar-fill').forEach(bar => {
+        const w = bar.dataset.width;
+        bar.style.width = w + '%';
+      });
+      specObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.3 });
+const specsPanel = document.getElementById('specsPanel');
+if (specsPanel) specObserver.observe(specsPanel);
+
+// ── Nav active ──
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll', () => {
+  const pos = window.scrollY + 100;
+  sections.forEach(sec => {
+    if (pos >= sec.offsetTop && pos < sec.offsetTop + sec.offsetHeight) {
+      navLinks.forEach(a => {
+        a.style.color = a.getAttribute('href') === '#' + sec.id ? 'var(--cyan)' : '';
+      });
+    }
+  });
+});
+
+// ── Parallax hero visual ──
+window.addEventListener('scroll', () => {
+  const heroVisual = document.querySelector('.hero-visual');
+  if (heroVisual) {
+    const scrolled = window.pageYOffset;
+    heroVisual.style.transform = `translateY(calc(-50% + ${scrolled * 0.12}px))`;
+  }
+});
+</script>
+</body>
+</html>
